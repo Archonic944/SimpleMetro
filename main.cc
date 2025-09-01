@@ -39,8 +39,6 @@ int main(int argc, char *argv[])
     int interval = 60000 / bpm; // Milliseconds
     uint64_t ms = getEpochMs();
     uint64_t nextBeat = ms + (ms % interval);
-    cout << "Next beat is " << (nextBeat - ms) << " ms away" << endl;
-    cout << ms << endl;
     // sound.playClick();
     // this_thread::sleep_for(chrono::milliseconds(interval));
     while (true)
@@ -50,7 +48,6 @@ int main(int argc, char *argv[])
         {
             sound.playClick();
             nextBeat += interval;
-            cout << "Next beat is " << (nextBeat - ms) << " ms away" << endl;
         }
     }
 
