@@ -2,9 +2,7 @@ name: Build and Release
 
 on:
   push:
-    tags:
-      - '*'           # Build on every tag pushed
-  workflow_dispatch:   # Also allow manual trigger
+  workflow_dispatch:   
 
 jobs:
   build-linux:
