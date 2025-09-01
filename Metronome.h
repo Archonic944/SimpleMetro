@@ -10,5 +10,5 @@ public:
     void playClick();
 
 private:
-    void *impl; // Opaque pointer to hide Objective-C++ implementation
+    void *impl; // Opaque pointer to hide Objective-C++ implementation on MacOz
 };

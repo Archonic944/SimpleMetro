@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
     {
         cerr << "Failed to initialize metronome sound.\nThe sound might not exist: does the executable share a root with the resources folder?" << endl;
         return 1;
-    }
+    }oo
     int bpm = 120;
     if (argc <= 1)
     {
