@@ -37,8 +37,8 @@ int main(int argc, char *argv[])
         }
     }
     int interval = 60000 / bpm; // Milliseconds
-    auto ms = getEpochMs();
-    unsigned long nextBeat = ms + (ms % interval);
+    uint64_t ms = getEpochMs();
+    uint64_t nextBeat = ms + (ms % interval);
     cout << "Next beat is " << (nextBeat - ms) << " ms away" << endl;
     cout << ms << endl;
     // sound.playClick();
