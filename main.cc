@@ -5,7 +5,7 @@ using namespace std;
 #include <chrono>
 #include "Metronome.h"
 
-unsigned long getEpochMs()
+uint64_t getEpochMs()
 {
     auto now = chrono::system_clock::now();
     auto epoch = now.time_since_epoch();
@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
     {
         cerr << "Failed to initialize metronome sound.\nThe sound might not exist: does the executable share a root with the resources folder?" << endl;
         return 1;
-    }oo
+    }
     int bpm = 120;
     if (argc <= 1)
     {

@@ -13,7 +13,7 @@ Metronome::Metronome() {
 	impl = new MetronomeWinImpl();
 }
 
-bool Metronome::init(std::string soundFile) {
+bool Metronome::init(const std::string& soundFile) {
 	((MetronomeWinImpl*)impl)->filename = soundFile;
 	return true;
 }
