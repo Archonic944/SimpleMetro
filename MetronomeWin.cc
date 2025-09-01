@@ -1,27 +1,15 @@
-#include <Windows.h>
-#include <mmsystem.h>
-#include "Metronome.h"
+#include <windows.h>
+#include <string>
 
-std::string filename;
-
-class MetronomeWinImpl {
-	public:
-		std::string filename;
-};
-
-Metronome::Metronome() {
-	impl = new MetronomeWinImpl();
+std::string GetExecutablePath() {
+    char path[MAX_PATH];
+    GetModuleFileNameA(NULL, path, MAX_PATH);
+    std::string executablePath(path);
+    return executablePath.substr(0, executablePath.find_last_of("\\/")) + "\\";
 }
 
-bool Metronome::init(const std::string& soundFile) {
-	((MetronomeWinImpl*)impl)->filename = soundFile;
-	return true;
-}
-
-void Metronome::playClick() {
-	PlaySoundA(((MetronomeWinImpl*)impl)->filename.c_str(), NULL, SND_FILENAME | SND_ASYNC);
-}
-
-Metronome::~Metronome() {
-	delete (MetronomeWinImpl*)impl;
+void Metronome::init(const std::string& soundFilePath) {
+    std::string executableDir = GetExecutablePath();
+    std::string fullPath = executableDir + soundFilePath;
+    // ... rest of the initialization code
 }
