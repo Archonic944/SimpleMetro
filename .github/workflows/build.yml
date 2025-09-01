@@ -3,8 +3,8 @@ name: Build and Release
 on:
   push:
     tags:
-      - '*'
-  workflow_dispatch:
+      - '*'           # Build on every tag pushed
+  workflow_dispatch:   # Also allow manual trigger
 
 jobs:
   build-linux:
@@ -21,7 +21,7 @@ jobs:
       - name: Build
         run: cmake --build build --config Release
 
-      - name: Upload binary
+      - name: Upload Linux binary
         uses: actions/upload-artifact@v4
         with:
           name: metronome-linux
@@ -38,7 +38,7 @@ jobs:
       - name: Build
         run: cmake --build build --config Release
 
-      - name: Upload binary
+      - name: Upload macOS binary
         uses: actions/upload-artifact@v4
         with:
           name: metronome-macos
@@ -55,7 +55,7 @@ jobs:
       - name: Build
         run: cmake --build build --config Release
 
-      - name: Upload binary
+      - name: Upload Windows binary
         uses: actions/upload-artifact@v4
         with:
           name: metronome-windows
@@ -64,31 +64,50 @@ jobs:
   release:
     needs: [build-linux, build-macos, build-windows]
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/')
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v4  # To get sounds/ folder
+
+      - name: Download Linux binary
+        uses: actions/download-artifact@v4
         with:
           name: metronome-linux
-          path: dist/
+          path: dist/linux/
 
-      - uses: actions/download-artifact@v4
+      - name: Download macOS binary
+        uses: actions/download-artifact@v4
         with:
           name: metronome-macos
-          path: dist/
+          path: dist/macos/
 
-      - uses: actions/download-artifact@v4
+      - name: Download Windows binary
+        uses: actions/download-artifact@v4
         with:
           name: metronome-windows
-          path: dist/
+          path: dist/windows/
 
-      - name: Zip binaries
+      - name: Copy sounds folder to all platforms
+        run: |
+          cp -r sounds dist/linux/
+          cp -r sounds dist/macos/
+          cp -r sounds dist/windows/
+
+      - name: Zip Linux build + sounds
         run: |
           cd dist
-          zip metronome-linux.zip metronome
-          zip metronome-macos.zip metronome_mac
-          zip metronome-windows.zip metronome_win.exe
+          zip -r metronome-linux.zip linux
 
-      - name: Create GitHub Release
+      - name: Zip macOS build + sounds
+        run: |
+          cd dist
+          zip -r metronome-macos.zip macos
+
+      - name: Zip Windows build + sounds
+        run: |
+          cd dist
+          zip -r metronome-windows.zip windows
+
+      - name: Create GitHub Release with ZIPs
         uses: softprops/action-gh-release@v2
         with:
           files: |
