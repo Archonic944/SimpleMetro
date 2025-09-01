@@ -1,8 +1,9 @@
 #include <string>
 #include <iostream>
 using namespace std;
-#include <SFML/Audio.hpp>
 #include <thread>
+#include <chrono>
+#include "Metronome.h"
 
 unsigned long getEpochMs()
 {
@@ -13,7 +14,12 @@ unsigned long getEpochMs()
 
 int main(int argc, char *argv[])
 {
-    sf::SoundBuffer buffer;
+    Metronome sound;
+    if (!sound.init("sounds/metronome.wav"))
+    {
+        cerr << "Failed to initialize metronome sound.\nThe sound might not exist: does the executable share a root with the resources folder?" << endl;
+        return 1;
+    }
     int bpm = 120;
     if (argc <= 1)
     {
@@ -35,23 +41,17 @@ int main(int argc, char *argv[])
     unsigned long nextBeat = ms + (ms % interval);
     cout << "Next beat is " << (nextBeat - ms) << " ms away" << endl;
     cout << ms << endl;
-    if (buffer.loadFromFile("sounds/metronome.wav"))
+    // sound.playClick();
+    // this_thread::sleep_for(chrono::milliseconds(interval));
+    while (true)
     {
-        sf::Sound sound(buffer);
-        while (true)
+        auto ms = getEpochMs();
+        if (ms >= nextBeat)
         {
-            auto ms = getEpochMs();
-            if (ms >= nextBeat)
-            {
-                sound.play();
-                nextBeat += interval;
-                cout << "Next beat is " << (nextBeat - ms) << " ms away" << endl;
-            }
+            sound.playClick();
+            nextBeat += interval;
+            cout << "Next beat is " << (nextBeat - ms) << " ms away" << endl;
         }
-    }
-    else
-    {
-        cerr << "Error loading sound file" << endl;
     }
 
     return 0;

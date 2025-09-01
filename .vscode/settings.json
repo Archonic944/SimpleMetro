@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "*.m": "objective-c",
-        "chrono": "cpp"
+        "chrono": "cpp",
+        "iostream": "cpp"
     }
 }

@@ -1,16 +1,22 @@
-CXX = g++
-CXXFLAGS = -std=c++17 -I/opt/homebrew/include
-LIBS = -L/opt/homebrew/lib -lsfml-audio -lsfml-system
-TARGET = main
-SOURCE = main.cc
+CXX = clang++
+CXXFLAGS = -std=c++17
+LDFLAGS_MAC = -framework AudioToolbox -framework CoreFoundation -framework Cocoa
 
-$(TARGET): $(SOURCE)
-	$(CXX) $(CXXFLAGS) $(SOURCE) $(LIBS) -o $(TARGET).out
+MAIN_SOURCE = main.cc
+MAC_SOURCE = MetronomeMac.mm
+TARGET = metronome
+
+out:
+	mkdir -p out
+
+mac: out
+	$(CXX) $(CXXFLAGS) -c $(MAC_SOURCE) -o out/MetronomeMac.o -DMAC
+	$(CXX) $(CXXFLAGS) $(MAIN_SOURCE) out/MetronomeMac.o $(LDFLAGS_MAC) -o out/$(TARGET)_mac -DMAC
 
 clean:
-	rm -f $(TARGET)
+	rm -f out/$(TARGET)_mac out/*.o
 
-run: $(TARGET)
-	./$(TARGET).out
+run: mac
+	./out/$(TARGET)_mac
 
-.PHONY: clean run
+.PHONY: clean run mac
