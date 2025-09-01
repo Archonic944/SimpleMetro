@@ -29,7 +29,7 @@ jobs:
           cp -r ../sounds package/
           zip -r metronome-linux.zip package
         # Upload artifact
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: metronome-linux
           path: build/metronome-linux.zip
@@ -52,7 +52,7 @@ jobs:
           cp metronome package/
           cp -r ../sounds package/
           zip -r metronome-macos.zip package
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: metronome-macos
           path: build/metronome-macos.zip
