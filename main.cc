@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
     }
     int interval = 60000 / bpm; // Milliseconds
     uint64_t ms = getEpochMs();
-    uint64_t nextBeat = ms + (ms % interval);
+    uint64_t nextBeat = ms - (ms % interval) + interval;
     while (true)
     {
         auto ms = getEpochMs();
