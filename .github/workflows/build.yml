@@ -6,6 +6,9 @@ on:
       - '*'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   build-linux:
     runs-on: ubuntu-latest
@@ -13,7 +16,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install dependencies
-        run: sudo apt-get install -y libao-dev libsndfile1-dev cmake build-essential
+        run: sudo apt-get update && sudo apt-get install -y libao-dev libsndfile1-dev cmake build-essential zip
 
       - name: Build Linux binary
         run: |
@@ -28,7 +31,7 @@ jobs:
           cp metronome package/
           cp -r ../sounds package/
           zip -r metronome-linux.zip package
-        # Upload artifact
+
       - uses: actions/upload-artifact@v4
         with:
           name: metronome-linux
@@ -38,6 +41,9 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: brew install cmake
 
       - name: Build macOS binary
         run: |
@@ -49,9 +55,10 @@ jobs:
         run: |
           cd build
           mkdir package
-          cp metronome package/
+          cp metronome_mac package/
           cp -r ../sounds package/
           zip -r metronome-macos.zip package
+
       - uses: actions/upload-artifact@v4
         with:
           name: metronome-macos
@@ -61,6 +68,9 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y
 
       - name: Build Windows binary
         run: |
@@ -73,10 +83,11 @@ jobs:
         run: |
           cd build
           mkdir package
-          copy Release\metronome.exe package\
+          copy Release\metronome_win.exe package\
           xcopy /E /I ..\sounds package\sounds\
           powershell Compress-Archive -Path package -DestinationPath metronome-windows.zip
-      - uses: actions/upload-artifact@v3
+
+      - uses: actions/upload-artifact@v4
         with:
           name: metronome-windows
           path: build\metronome-windows.zip
