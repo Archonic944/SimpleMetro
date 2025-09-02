@@ -12,9 +12,11 @@ Therefore, if two computers share the same system time, then the metronome click
 
 ## Usage
 
-Within your terminal emulator/command prompt:
+1. Make sure `metro` exists in your PATH variable.
 
-```<path to metronome executable> <bpm>```
+2. Within your terminal/command prompt:
+
+```metro <bpm>```
 
 Quit using Ctrl+C.
 
