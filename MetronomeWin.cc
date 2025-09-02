@@ -1,7 +1,6 @@
 #include <Windows.h>
 #include <mmsystem.h>
 #include <string>
-#include <libgen.h>
 #include "Metronome.h"
 
 class MetronomeWinImpl {
