@@ -42,9 +42,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: brew install cmake
-
       - name: Build macOS binary
         run: |
           mkdir -p build && cd build
