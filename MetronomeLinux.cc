@@ -5,6 +5,9 @@
 #include <thread>
 #include <atomic>
 #include <chrono>
+#include <unistd.h>
+#include <limits.h>
+#include <libgen.h>
 
 class MetronomeLinuxImpl {
 public:
@@ -17,26 +20,32 @@ public:
     std::atomic<bool> exitThread{ false };
 
     static constexpr int bufferFrames = 1024;
-    short buffer[bufferFrames * 2];  // assuming max 2 channels
+    short buffer[bufferFrames * 2];
 
     void playbackLoop() {
         while (!exitThread.load(std::memory_order_acquire)) {
             if (playRequested.exchange(false, std::memory_order_acq_rel)) {
-                // Reset to start of file
                 sf_seek(sndfile, 0, SEEK_SET);
-
                 sf_count_t framesRead;
                 while ((framesRead = sf_readf_short(sndfile, buffer, bufferFrames)) > 0) {
                     int bytes = static_cast<int>(framesRead * sfinfo.channels * sizeof(short));
                     ao_play(device, (char*)buffer, bytes);
                 }
             }
-
-            // Prevent busy waiting
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }
     }
 };
+
+static std::string getExecutableDir() {
+    char exePath[PATH_MAX];
+    ssize_t len = readlink("/proc/self/exe", exePath, sizeof(exePath) - 1);
+    if (len != -1) {
+        exePath[len] = '\0';
+        return std::string(dirname(exePath));
+    }
+    return "";
+}
 
 Metronome::Metronome() {
     impl = new MetronomeLinuxImpl();
@@ -47,19 +56,15 @@ Metronome::~Metronome() {
     auto* pimpl = static_cast<MetronomeLinuxImpl*>(impl);
     if (pimpl) {
         pimpl->exitThread.store(true, std::memory_order_release);
-
         if (pimpl->playbackThread.joinable()) {
             pimpl->playbackThread.join();
         }
-
         if (pimpl->device) {
             ao_close(pimpl->device);
         }
-
         if (pimpl->sndfile) {
             sf_close(pimpl->sndfile);
         }
-
         ao_shutdown();
         delete pimpl;
     }
@@ -68,9 +73,12 @@ Metronome::~Metronome() {
 bool Metronome::init(const std::string& filePath) {
     auto* pimpl = static_cast<MetronomeLinuxImpl*>(impl);
 
-    pimpl->sndfile = sf_open(filePath.c_str(), SFM_READ, &pimpl->sfinfo);
+    std::string exeDir = getExecutableDir();
+    std::string fullPath = exeDir + "/" + filePath;
+
+    pimpl->sndfile = sf_open(fullPath.c_str(), SFM_READ, &pimpl->sfinfo);
     if (!pimpl->sndfile) {
-        std::cerr << "Failed to open sound file: " << filePath << std::endl;
+        std::cerr << "Failed to open sound file: " << fullPath << std::endl;
         return false;
     }
 
@@ -88,7 +96,6 @@ bool Metronome::init(const std::string& filePath) {
         return false;
     }
 
-    // Start playback thread
     pimpl->playbackThread = std::thread(&MetronomeLinuxImpl::playbackLoop, pimpl);
 
     return true;
@@ -100,6 +107,5 @@ void Metronome::playClick() {
         std::cerr << "Audio device or sound file not initialized." << std::endl;
         return;
     }
-
     pimpl->playRequested.store(true, std::memory_order_release);
 }
