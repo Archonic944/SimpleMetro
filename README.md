@@ -1,4 +1,4 @@
-# SimpleMetro
+# `metro` - CLI metronome
 
 A basic, cross platform CLI metronome. Uses OS-native frameworks to play audio. Mostly meant as an exercise to see what it takes to create a cross-platform application with C++.
 
