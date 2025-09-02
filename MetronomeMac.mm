@@ -1,4 +1,7 @@
 #import <Cocoa/Cocoa.h>
+#include <mach-o/dyld.h>
+#include <string>
+#include <filesystem>
 #include "Metronome.h"
 
 // Private implementation class
@@ -57,7 +60,25 @@ Metronome::~Metronome() {
 }
 
 bool Metronome::init(const std::string& filePath) {
-    NSString* nsPath = [NSString stringWithUTF8String:filePath.c_str()];
+    // Get the executable's directory path
+    uint32_t bufsize = 0;
+    _NSGetExecutablePath(nullptr, &bufsize); // Get required buffer size
+    
+    char* exePath = new char[bufsize];
+    if (_NSGetExecutablePath(exePath, &bufsize) != 0) {
+        delete[] exePath;
+        return false; // Failed to get executable path
+    }
+    
+    // Extract directory from executable path and join with relative sound file path
+    std::filesystem::path executablePath(exePath);
+    std::filesystem::path executableDir = executablePath.parent_path();
+    std::filesystem::path soundFilePath = executableDir / filePath;
+    
+    delete[] exePath;
+    
+    // Convert to NSString for use with NSSound
+    NSString* nsPath = [NSString stringWithUTF8String:soundFilePath.string().c_str()];
     MetronomeImpl* implPtr = [[MetronomeImpl alloc] init];
     
     if ([implPtr initWithPath:nsPath]) {

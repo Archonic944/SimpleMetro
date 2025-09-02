@@ -5,6 +5,10 @@
 #include <thread>
 #include <atomic>
 #include <chrono>
+#include <unistd.h>
+#include <string>
+#include <filesystem>
+#include <climits>
 
 class MetronomeLinuxImpl {
 public:
@@ -67,10 +71,27 @@ Metronome::~Metronome() {
 
 bool Metronome::init(const std::string& filePath) {
     auto* pimpl = static_cast<MetronomeLinuxImpl*>(impl);
+    
+    // Get the executable's directory path
+    char exePath[PATH_MAX];
+    ssize_t len = readlink("/proc/self/exe", exePath, sizeof(exePath) - 1);
+    if (len == -1) {
+        std::cerr << "Failed to get executable path." << std::endl;
+        return false;
+    }
+    exePath[len] = '\0'; // Null-terminate
+    
+    // Extract directory from executable path and join with relative sound file path
+    std::filesystem::path executablePath(exePath);
+    std::filesystem::path executableDir = executablePath.parent_path();
+    std::filesystem::path soundFilePath = executableDir / filePath;
+    
+    // Use the absolute path for sound file loading
+    std::string absolutePath = soundFilePath.string();
 
-    pimpl->sndfile = sf_open(filePath.c_str(), SFM_READ, &pimpl->sfinfo);
+    pimpl->sndfile = sf_open(absolutePath.c_str(), SFM_READ, &pimpl->sfinfo);
     if (!pimpl->sndfile) {
-        std::cerr << "Failed to open sound file: " << filePath << std::endl;
+        std::cerr << "Failed to open sound file: " << absolutePath << std::endl;
         return false;
     }
 
